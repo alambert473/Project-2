@@ -1,0 +1,144 @@
+.signinbackground {
+    height: 100vh;
+    background-image: linear-gradient(120deg, rgb(106, 173, 214), rgb(20, 104, 207));
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.signinbackground p {
+    margin-top: 15px;
+    margin-bottom: 25px;
+    font-size: 4rem;
+    text-align: center;
+    font-weight: bold;
+    color: white;
+    color: rgb(29, 29, 29);
+}
+.container {
+    background-color: rgb(255, 255, 255);
+    width: 600px;
+    height: 700px;
+    display: flex;
+    opacity: 1;
+    flex-direction: column;
+    justify-content: start;
+    align-items: center;
+    border-radius: 10px;
+    box-shadow: -5px 5px 15px rgba(0, 0, 0, 0.5);
+    animation-name: fromRight;
+    animation-duration: 1s;
+    animation-fill-mode: forwards;
+    animation-timing-function: ease-out;
+}
+
+@keyframes fromRight {
+    from {
+        transform: translateX(280%);
+        opacity: 0;
+    }
+}
+
+.user-picture {
+    font-size: 4rem;
+    margin-top: 100px;
+    color: white;
+    background-color: rgb(78, 157, 253);
+    padding: 25px 25px;
+    border-radius: 55px;
+}
+
+.email-section {
+    padding: 20px;
+    background-color: rgb(243, 243, 243, .8);
+}
+
+.password-section {
+    padding: 20px;
+    background-color: rgb(243, 243, 243, .8);
+}
+
+.signinsubmit {
+    font-size: 2.5rem;
+    margin-top: 40px;
+    border-radius: 40px;
+    width: 85%;
+    cursor: pointer;
+    background-color: rgb(78, 157, 253);
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    transition: .3s;
+    box-shadow: 0px 0px 10px rgb(25, 100, 171, .7);
+}
+
+.signinsubmit:hover {
+    background-color: rgb(10, 120, 255);
+}
+
+@media(max-width: 700px) {
+    .container {
+        width: 500px;
+    }
+
+}
+
+@media (max-width: 600px) {
+    .container {
+        box-shadow: initial;
+    }
+    .signinbackground {
+        background-image: initial;
+        background-color: white;
+    }
+
+}
+
+@media (max-width: 523px) {
+    .user-picture {
+        font-size: 2rem;
+    }
+    .signinbackground p {
+        font-size: 3rem;
+    }
+    .email-section, .password-section {
+        padding: 20px;
+        font-size: 1.3rem;
+        background-color: rgb(243, 243, 243, .8);
+    }
+    .signinsubmit {
+        margin-top: 30px;
+        font-size: 1.5rem;
+    }
+    
+}
+
+@media(max-height: 820px) {
+    .container {
+        height: 400px;
+        width: 400px;
+    }
+    .user-picture {
+        margin-top: 30px;
+        padding: 15px 15px;
+        font-size: 2rem;
+    }
+    .signinbackground p {
+        font-size: 2rem;
+    }
+    .email-section {
+        padding: 10px;
+        font-size: 1rem;
+        background-color: rgb(243, 243, 243, .8);
+    }
+    
+    .password-section {
+        padding: 10px;
+        font-size: 1rem;
+        background-color: rgb(243, 243, 243, .8);
+    }
+    .signinsubmit {
+        margin-top: 30px;
+        font-size: 1.5rem;
+    }
+}

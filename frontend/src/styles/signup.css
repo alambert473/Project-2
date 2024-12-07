@@ -1,5 +1,5 @@
 .root {
-    --background-color-default: rgb(50, 58, 99);
+    --background-color-default: rgb(54, 54, 54);
 }
 
 .signupbackground {
@@ -23,7 +23,7 @@ form {
 
 .title {
     margin: 0;
-    font-size: 2rem;
+    font-size: 4rem;
     font-weight: 700;
     color: var(--background-color-default);
     margin-bottom: 20px;
@@ -46,27 +46,23 @@ form {
     width: 100%;
 }
 
-
 input {
+    font-size: 1.4rem;
     background-color: rgba(240, 240, 240, 0.815);
-    border-radius: 20px;
+    border-radius: 10px;
     border: none;
-    padding: 13px 18px;
+    padding: 20px 18px;
+    color: var(--background-color-default);
     margin-top: 20px;
     width: 80%;
     box-shadow: 1px 2px 5px rgb(69, 69, 69, 0.3);
-}
-
-input::placeholder {
-    color: var(--background-color-default);
-    font-size: 1.02rem;
 }
 
 .leftside button {
     margin-top: 20px;
     font-size: 1.3rem;
     border: none;
-    background-color: rgb(31, 66, 239);
+    background-color: rgb(60, 143, 220);
     color: white;
     padding: 10px 20px;
     border-radius: 50px;
@@ -79,7 +75,7 @@ input::placeholder {
 }
 
 .rightside {
-    background-image: linear-gradient(120deg, var(--background-color-default), rgb(16, 16, 230));
+    background-image: linear-gradient(120deg, rgb(106, 173, 214), rgb(16, 16, 230));
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -96,7 +92,7 @@ input::placeholder {
 
 .hellotitle {
     text-align: center;
-    font-size: 3rem;
+    font-size: 5rem;
     color: white;
     font-weight: bold;
     margin-top: 0px;
@@ -112,7 +108,7 @@ input::placeholder {
     color: rgb(237, 237, 237);
     margin-top: 0px;
     margin-bottom: 32px;
-    font-size: 1.2rem;
+    font-size: 1.4rem;
     width: 80%;
     text-align: center;
 }
@@ -123,20 +119,21 @@ input::placeholder {
     } 
 }
 
-.rightside button {
+.signupbutton{
     background-color: transparent;
+    text-decoration: none;
     color: white;
-    border: 1.5px white solid;
+    border: 2px white solid;
     padding: 10px 30px;
     border-radius: 50px;
+    font-size: 1.2rem;
     font-weight: bold;
     cursor: pointer;
     transition: .3s;
 }
 
-.rightside button:hover {
+.signupbutton:hover {
     background-color: white;
-    border: 1px black solid;
     color: black;
 }
 
@@ -156,7 +153,7 @@ input::placeholder {
         margin-top: 20px;
     }
 
-    .rightside button {
+    .signupbutton {
         margin-bottom: 5px;
     }
     .rightside {

@@ -2,4 +2,6 @@ body {
     margin: 0;
     font-family: Arial, Helvetica, sans-serif;
     background-color: rgb(241, 241, 241);
+    overflow-x: hidden;
+    overflow-y: hidden;
 }
