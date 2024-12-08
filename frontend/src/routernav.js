@@ -1,20 +1,28 @@
-import { BrowserRouter, Routes, Route, Outlet } from "react-router-dom";
+import { BrowserRouter, Routes, Route } from "react-router-dom";
 import SignUp from './signup';
-import SignIn from "./signin";
-import App from './App';
+import SignIn from './signin';
+import ClientDashboard from './clientDashboard';
+import ContractorDashboard from './contractorDashboard';
+import RequestForQuote from './requestForQuote';
+import QuoteResponse from './quoteResponse';
+import Order from './order';
+import Bill from './bill';
 
-const router = () => {
+const RouterNav = () => {
   return (
-    <div>
-      <BrowserRouter>
-        <Routes>
-          <Route index element = {<SignUp />} />
-          <Route path="/signin" element={<SignIn />} />
-        </Routes>
-      </BrowserRouter>
-      <Outlet />
-    </div>
+    <BrowserRouter>
+      <Routes>
+        <Route path="/" element={<SignUp />} />
+        <Route path="/signin" element={<SignIn />} />
+        <Route path="/client-dashboard" element={<ClientDashboard />} />
+        <Route path="/contractor-dashboard" element={<ContractorDashboard />} />
+        <Route path="/request-quote" element={<RequestForQuote />} />
+        <Route path="/quote-response" element={<QuoteResponse />} />
+        <Route path="/order" element={<Order />} />
+        <Route path="/bill" element={<Bill />} />
+      </Routes>
+    </BrowserRouter>
   );
 };
 
-export default router;
+export default RouterNav;
