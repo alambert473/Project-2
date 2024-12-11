@@ -9,13 +9,45 @@ const SignUp = () => {
     const [address, setAddress] = useState('');
     const [phoneNumber, setPhoneNumber] = useState('');
     const [creditCard, setCreditCard] = useState('');
+    const [error, setError] = useState('');
+    const [success, setSuccess] = useState('');
 
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
-        // Ideally send data to the backend to create a new client
-        console.log({
-            firstName, lastName, email, address, phoneNumber, creditCard
-        });
+        setError('');
+        setSuccess('');
+
+        try {
+            const response = await fetch('http://localhost:4000/api/clients/register', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    first_name: firstName,
+                    last_name: lastName,
+                    email,
+                    address,
+                    phone_number: phoneNumber,
+                    credit_card_info: creditCard,
+                }),
+            });
+
+            if (!response.ok) {
+                throw new Error('Failed to register. Please try again.');
+            }
+
+            const result = await response.json();
+            setSuccess('Registration successful! You can now log in.');
+            setFirstName('');
+            setLastName('');
+            setEmail('');
+            setAddress('');
+            setPhoneNumber('');
+            setCreditCard('');
+        } catch (err) {
+            setError(err.message);
+        }
     };
 
     return (
