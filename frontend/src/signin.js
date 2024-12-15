@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import './styles/signin.css';
 
 const SignIn = () => {
-    let navigate = useNavigate();
+    const navigate = useNavigate();
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [error, setError] = useState('');
@@ -15,11 +15,9 @@ const SignIn = () => {
         setSuccess('');
 
         try {
-            const response = await fetch('http://localhost:5050/api/auth/signin', {
+            const response = await fetch('http://localhost:5050/clients/login', {
                 method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
+                headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ email, password }),
             });
 
@@ -29,10 +27,10 @@ const SignIn = () => {
 
             const result = await response.json();
             setSuccess('Login successful!');
-            setEmail('');
-            setPassword('');
+            localStorage.setItem('client_id', result.client_id); 
+            localStorage.setItem('email', email); 
 
-            navigate('/clientDashboard');
+            navigate('/client-dashboard'); // Redirect to the client dashboard
         } catch (err) {
             setError(err.message);
         }

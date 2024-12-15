@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from "react";
 
 const Bill = () => {
-    const [bills, setBills] = useState([]); // State to store all bills
-    const [selectedBillId, setSelectedBillId] = useState(''); // State for the selected bill
-    const [paymentStatus, setPaymentStatus] = useState(''); // State for payment status
-    const [note, setNote] = useState(''); // Optional note for disputes
+    const [bills, setBills] = useState([]); 
+    const [selectedBillId, setSelectedBillId] = useState(''); 
+    const [paymentStatus, setPaymentStatus] = useState(''); 
+    const [note, setNote] = useState(''); 
 
     // Fetch bills from the backend when the component loads
     useEffect(() => {

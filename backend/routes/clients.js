@@ -1,51 +1,60 @@
 const express = require('express');
-const bcrypt = require('bcrypt');
 const router = express.Router();
-const db = require('../db/connection');
+const DbService = require('../dbService');
 
-// Register a new client
-router.get('/register', async (req, res) => {
-  const { first_name, last_name, address, credit_card_info, phone_number, email, password } = req.body;
+router.post('/register', (req, res) => {
+    const { first_name, last_name, address, credit_card_info, phone_number, email, password } = req.body;
+    console.log('Register endpoint called with data:', req.body);
 
-  try {
-    const hashedPassword = await bcrypt.hash(password, 10);
-    const [result] = await db.execute(
-      'INSERT INTO clients (first_name, last_name, address, credit_card_info, phone_number, email, password) VALUES (?, ?, ?, ?, ?, ?, ?)',
-      [first_name, last_name, address, credit_card_info, phone_number, email, hashedPassword]
+    const db = DbService.getDbServiceInstance();
+    const registrationDate = new Date().toISOString().split('T')[0];
+
+    const result = db.insertNewUser(
+        first_name,
+        last_name,
+        address,
+        credit_card_info,
+        phone_number,
+        email,
+        password,
+        registrationDate
     );
-    res.status(201).json({ client_id: result.insertId });
-  } catch (err) {
-    console.error('Error registering client:', err);
-    res.status(500).json({ error: 'Failed to register client.' });
-  }
+
+    result
+        .then(data => res.status(201).json({ message: 'User registered successfully', user: data }))
+        .catch(err => {
+            console.error('Error in /register:', err);
+            res.status(500).json({ error: 'Failed to register user' });
+        });
 });
 
+module.exports = router;
+
 // Login a client
-router.post('/login', async (req, res) => {
+router.post('/login', (req, res) => {
+  console.log("Client login attempt...");
   const { email, password } = req.body;
 
-  try {
-    const [rows] = await db.execute('SELECT * FROM clients WHERE email = ?', [email]);
+  const db = DbService.getDbServiceInstance();
+  const result = db.checkClientLogin(email, password);
 
-    if (rows.length === 0) {
-      return res.status(401).json({ error: 'Invalid email or password.' });
-    }
-
-    const client = rows[0];
-    const isPasswordValid = await bcrypt.compare(password, client.password);
-
-    if (!isPasswordValid) {
-      return res.status(401).json({ error: 'Invalid email or password.' });
-    }
-
-    res.status(200).json({
-      message: 'Login successful',
-      client: { id: client.client_id, email: client.email, first_name: client.first_name },
+  result
+    .then((data) => {
+      if (data.length > 0) {
+        res.status(200).json({
+          success: true,
+          message: 'Login successful!',
+          client_id: data[0].client_id, 
+        });
+      } else {
+        console.log("Invalid email or password for:", email);
+        res.status(401).json({ error: 'Invalid email or password.' });
+      }
+    })
+    .catch((err) => {
+      console.error("Error during login:", err);
+      res.status(500).json({ error: 'Failed to log in.' });
     });
-  } catch (err) {
-    console.error('Error during login:', err);
-    res.status(500).json({ error: 'Failed to log in.' });
-  }
 });
 
 module.exports = router;

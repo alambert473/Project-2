@@ -1,14 +1,16 @@
 import React, { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom"; // Import useNavigate
 import './styles/signup.css';
 
 const SignUp = () => {
+    const navigate = useNavigate(); // Initialize useNavigate hook
     const [firstName, setFirstName] = useState('');
     const [lastName, setLastName] = useState('');
     const [email, setEmail] = useState('');
     const [address, setAddress] = useState('');
     const [phoneNumber, setPhoneNumber] = useState('');
     const [creditCard, setCreditCard] = useState('');
+    const [password, setPassword] = useState('');
     const [error, setError] = useState('');
     const [success, setSuccess] = useState('');
 
@@ -18,7 +20,7 @@ const SignUp = () => {
         setSuccess('');
 
         try {
-            const response = await fetch('http://localhost:4000/api/clients/register', {
+            const response = await fetch('http://localhost:5050/clients/register', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -30,6 +32,7 @@ const SignUp = () => {
                     address,
                     phone_number: phoneNumber,
                     credit_card_info: creditCard,
+                    password,
                 }),
             });
 
@@ -38,13 +41,19 @@ const SignUp = () => {
             }
 
             const result = await response.json();
-            setSuccess('Registration successful! You can now log in.');
+            setSuccess('Registration successful! Redirecting to login...');
+            
+            // Reset form fields
             setFirstName('');
             setLastName('');
             setEmail('');
             setAddress('');
             setPhoneNumber('');
             setCreditCard('');
+            setPassword('');
+
+
+            setTimeout(() => navigate('/signin'), 2000); // Wait 2 seconds before redirecting
         } catch (err) {
             setError(err.message);
         }
@@ -55,12 +64,15 @@ const SignUp = () => {
             <div className="leftside">
                 <form onSubmit={handleSubmit}>
                     <p className="title">Sign Up</p>
+                    {error && <p className="error">{error}</p>}
+                    {success && <p className="success">{success}</p>}
                     <input type="text" placeholder="Enter first name" value={firstName} onChange={(e) => setFirstName(e.target.value)} required />
                     <input type="text" placeholder="Enter last name" value={lastName} onChange={(e) => setLastName(e.target.value)} required />
                     <input type="email" placeholder="Enter your email" value={email} onChange={(e) => setEmail(e.target.value)} required />
                     <input type="text" placeholder="Enter your address" value={address} onChange={(e) => setAddress(e.target.value)} required />
                     <input type="text" placeholder="Enter your phone number" value={phoneNumber} onChange={(e) => setPhoneNumber(e.target.value)} required />
                     <input type="text" placeholder="Enter your credit card info" value={creditCard} onChange={(e) => setCreditCard(e.target.value)} required />
+                    <input type="password" placeholder="Enter your password" value={password} onChange={(e) => setPassword(e.target.value)} required />
                     <button type="submit">Register</button>
                 </form>
             </div>
