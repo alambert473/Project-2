@@ -10,6 +10,7 @@ const connection = mysql.createConnection({
     password: process.env.DB_PASSWORD || '',
     database: process.env.DB_NAME || 'drivewaysealing',
     port: process.env.DB_PORT || 3306,
+    multipleStatements: true 
 });
 
 connection.connect((err) => {
@@ -156,24 +157,31 @@ async respondToQuoteRequest(request_id, responder, note, counter_price, work_sta
 }
 
     // Fetch all quotes for a specific client (Pending or Accepted)
-    async getQuoteResponsesByClientId(client_id) {
+    async getAcceptedQuotesByClientId(client_id) {
         try {
             const response = await new Promise((resolve, reject) => {
                 const query = `
-                    SELECT qr.request_id, qr.responder, qr.note, qr.counter_price, 
-                           qr.work_start_date, qr.work_end_date, rq.property_address, rq.square_feet
+                    SELECT 
+                        qr.response_id, qr.request_id, qr.responder, qr.note, 
+                        qr.counter_price, qr.work_start_date, qr.work_end_date, qr.created_at,
+                        rfq.property_address, rfq.square_feet, rfq.proposed_price
                     FROM quoteresponses qr
-                    JOIN requestforquotes rq ON qr.request_id = rq.request_id
-                    WHERE rq.client_id = ?;
+                    INNER JOIN requestforquotes rfq ON qr.request_id = rfq.request_id
+                    WHERE rfq.client_id = ?;
                 `;
+    
                 connection.query(query, [client_id], (err, results) => {
-                    if (err) reject(new Error(err.message));
-                    else resolve(results);
+                    if (err) {
+                        console.error("Database Error:", err.message);
+                        reject(new Error(err.message));
+                    } else {
+                        resolve(results);
+                    }
                 });
             });
             return response;
         } catch (err) {
-            console.error("Error fetching quote responses:", err);
+            console.error("Error in getAcceptedQuotesByClientId:", err);
             throw err;
         }
     }
@@ -198,25 +206,47 @@ async respondToQuoteRequest(request_id, responder, note, counter_price, work_sta
 
     async acceptQuoteAndCreateOrder(request_id, client_id, agreed_price, work_start_date, work_end_date) {
         try {
-            const response = await new Promise((resolve, reject) => {
-                const query = `
-                    INSERT INTO orders (request_id, client_id, agreed_price, work_start_date, work_end_date, status, created_at)
+            // Insert into orders table
+            const insertOrder = await new Promise((resolve, reject) => {
+                const insertQuery = `
+                    INSERT INTO orders 
+                    (request_id, client_id, agreed_price, work_start_date, work_end_date, status, created_at)
                     VALUES (?, ?, ?, ?, ?, 'Pending', NOW());
-    
-                    UPDATE requestforquotes SET status = 'Submitted' WHERE request_id = ?;
                 `;
                 connection.query(
-                    query,
-                    [request_id, client_id, agreed_price, work_start_date, work_end_date, request_id],
+                    insertQuery,
+                    [request_id, client_id, agreed_price, work_start_date, work_end_date],
                     (err, result) => {
-                        if (err) reject(new Error(err.message));
-                        else resolve(result);
+                        if (err) {
+                            console.error("Error inserting into orders:", err.message);
+                            reject(err);
+                        } else {
+                            resolve(result);
+                        }
                     }
                 );
             });
-            return response;
+    
+            // Update the status of the requestforquotes table
+            const updateRequestStatus = await new Promise((resolve, reject) => {
+                const updateQuery = `
+                    UPDATE requestforquotes 
+                    SET status = 'Submitted' 
+                    WHERE request_id = ?;
+                `;
+                connection.query(updateQuery, [request_id], (err, result) => {
+                    if (err) {
+                        console.error("Error updating request status:", err.message);
+                        reject(err);
+                    } else {
+                        resolve(result);
+                    }
+                });
+            });
+    
+            return { insertOrder, updateRequestStatus };
         } catch (err) {
-            console.error("Error accepting quote and creating order:", err);
+            console.error("Error in acceptQuoteAndCreateOrder:", err.message);
             throw err;
         }
     }
@@ -245,6 +275,90 @@ async respondToQuoteRequest(request_id, responder, note, counter_price, work_sta
                 else resolve(results);
             });
         });
+    }
+
+    async generateBill(order_id, client_id, amount) {
+        try {
+            const response = await new Promise((resolve, reject) => {
+                const query = `
+                    INSERT INTO bills (order_id, client_id, amount, status, generated_at)
+                    VALUES (?, ?, ?, 'Pending', NOW());
+                `;
+                connection.query(query, [order_id, client_id, amount], (err, result) => {
+                    if (err) {
+                        console.error("Database Error:", err.message);
+                        reject(new Error(err.message));
+                    } else {
+                        resolve(result);
+                    }
+                });
+            });
+            return response;
+        } catch (err) {
+            console.error("Error in generateBill:", err);
+            throw err;
+        }
+    }
+    
+
+    async updateBillStatus(bill_id, status) {
+        try {
+            const response = await new Promise((resolve, reject) => {
+                const query = `
+                    UPDATE bills 
+                    SET status = ?, generated_at = NOW()
+                    WHERE bill_id = ?;
+                `;
+                connection.query(query, [status, bill_id], (err, result) => {
+                    if (err) reject(new Error(err.message));
+                    else resolve(result);
+                });
+            });
+            return response;
+        } catch (err) {
+            console.error("Error updating bill status:", err.message);
+            throw err;
+        }
+    }
+    
+    async getBillsByClientId(client_id) {
+        try {
+            const response = await new Promise((resolve, reject) => {
+                const query = `
+                    SELECT bill_id, order_id, amount, status, generated_at 
+                    FROM bills 
+                    WHERE client_id = ?;
+                `;
+                connection.query(query, [client_id], (err, results) => {
+                    if (err) reject(new Error(err.message));
+                    else resolve(results);
+                });
+            });
+            return response;
+        } catch (err) {
+            console.error("Error fetching bills:", err.message);
+            throw err;
+        }
+    }
+
+    async getAllBills() {
+        try {
+            const response = await new Promise((resolve, reject) => {
+                const query = "SELECT * FROM bills ORDER BY generated_at DESC;";
+                connection.query(query, (err, results) => {
+                    if (err) {
+                        console.error("Database Error:", err.message);
+                        reject(new Error(err.message));
+                    } else {
+                        resolve(results);
+                    }
+                });
+            });
+            return response;
+        } catch (err) {
+            console.error("Error in getAllBills:", err);
+            throw err;
+        }
     }
 }
 

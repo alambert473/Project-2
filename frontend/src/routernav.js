@@ -6,7 +6,9 @@ import ContractorDashboard from './contractorDashboard';
 import RequestForQuote from './requestForQuote';
 import QuoteResponse from './quoteResponse';
 import Viewqoute from './Viewqoute';
+import Orders from "./order";
 import Bill from './bill';
+import AddBill from "./AddBill";
 
 const RouterNav = () => {
   return (
@@ -19,7 +21,9 @@ const RouterNav = () => {
         <Route path="/request-quote" element={<RequestForQuote />} />
         <Route path="/quote-response" element={<QuoteResponse />} />
         <Route path="/viewqoute" element={<Viewqoute />} />
+        <Route path="/orders" element={<Orders />} />
         <Route path="/bill" element={<Bill />} />
+        <Route path="/addbill" element={<AddBill />} />
       </Routes>
     </BrowserRouter>
   );
