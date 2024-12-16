@@ -10,7 +10,24 @@ const Bills = () => {
 
     const clientId = localStorage.getItem("client_id"); // Fetch client ID from localStorage
 
-    // Fetch bills for the logged-in client
+    // Function to calculate if the bill is overdue
+    const isOverdue = (createdAt) => {
+        const billDate = new Date(createdAt);
+        const dueDate = new Date(billDate);
+        dueDate.setDate(dueDate.getDate() + 7); // Bill is overdue after 7 days
+        return new Date() > dueDate;
+    };
+
+    // Function to check if the bill was paid within 24 hours
+    const paidWithin24Hours = (createdAt, paidAt) => {
+        if (!paidAt) return false;
+        const billDate = new Date(createdAt);
+        const paymentDate = new Date(paidAt);
+        const timeDifference = paymentDate - billDate;
+        return timeDifference <= 24 * 60 * 60 * 1000; // 24 hours in milliseconds
+    };
+
+    // Function to fetch bills for the logged-in client
     useEffect(() => {
         if (!clientId) {
             setError("Client not logged in. Please log in first.");
@@ -25,6 +42,15 @@ const Bills = () => {
             .then((data) => setBills(data))
             .catch((err) => setError(err.message));
     }, [clientId]);
+
+    // Filter overdue bills
+    const overdueBills = bills.filter(bill => isOverdue(bill.created_at) && !bill.paid_at);
+
+    // Filter bad clients (clients who have never paid any bill after due date)
+    const badClients = bills.filter(bill => !bill.paid_at && isOverdue(bill.created_at));
+
+    // Filter good clients (clients who paid within 24 hours)
+    const goodClients = bills.filter(bill => paidWithin24Hours(bill.created_at, bill.paid_at));
 
     // Handle payment or dispute action
     const handleAction = async () => {
@@ -98,6 +124,51 @@ const Bills = () => {
                     </table>
                 ) : (
                     <p>No bills found.</p>
+                )}
+            </div>
+
+            <div>
+                <h3>Overdue Bills</h3>
+                {overdueBills.length > 0 ? (
+                    <ul>
+                        {overdueBills.map((bill) => (
+                            <li key={bill.bill_id}>
+                                Bill ID: {bill.bill_id} - Amount: ${bill.total_amount} - Due Date: {bill.created_at}
+                            </li>
+                        ))}
+                    </ul>
+                ) : (
+                    <p>No overdue bills.</p>
+                )}
+            </div>
+
+            <div>
+                <h3>Bad Clients</h3>
+                {badClients.length > 0 ? (
+                    <ul>
+                        {badClients.map((bill) => (
+                            <li key={bill.bill_id}>
+                                Bill ID: {bill.bill_id} - Amount: ${bill.total_amount} - Due Date: {bill.created_at}
+                            </li>
+                        ))}
+                    </ul>
+                ) : (
+                    <p>No bad clients.</p>
+                )}
+            </div>
+
+            <div>
+                <h3>Good Clients</h3>
+                {goodClients.length > 0 ? (
+                    <ul>
+                        {goodClients.map((bill) => (
+                            <li key={bill.bill_id}>
+                                Bill ID: {bill.bill_id} - Amount: ${bill.total_amount} - Paid At: {bill.paid_at}
+                            </li>
+                        ))}
+                    </ul>
+                ) : (
+                    <p>No good clients.</p>
                 )}
             </div>
 
