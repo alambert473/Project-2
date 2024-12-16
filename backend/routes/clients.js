@@ -28,7 +28,6 @@ router.post('/register', (req, res) => {
         });
 });
 
-module.exports = router;
 
 // Login a client
 router.post('/login', (req, res) => {
