@@ -1,82 +1,124 @@
 import React, { useState, useEffect } from "react";
 
-const Bill = () => {
-    const [bills, setBills] = useState([]); 
-    const [selectedBillId, setSelectedBillId] = useState(''); 
-    const [paymentStatus, setPaymentStatus] = useState(''); 
-    const [note, setNote] = useState(''); 
+const Bills = () => {
+    const [bills, setBills] = useState([]); // All fetched bills
+    const [selectedBillId, setSelectedBillId] = useState(""); // Selected bill to act on
+    const [status, setStatus] = useState(""); // Payment status: paid or disputed
+    const [note, setNote] = useState(""); // Optional note for disputes
+    const [error, setError] = useState("");
+    const [success, setSuccess] = useState("");
 
-    // Fetch bills from the backend when the component loads
+    const clientId = localStorage.getItem("client_id"); // Fetch client ID from localStorage
+
+    // Fetch bills for the logged-in client
     useEffect(() => {
-        fetch("http://localhost:5050/api/bills")
-            .then((response) => response.json())
-            .then((data) => setBills(data))
-            .catch((error) => console.error("Error fetching bills:", error));
-    }, []);
-
-    const handlePayment = () => {
-        if (!selectedBillId) {
-            alert("Please select a bill.");
+        if (!clientId) {
+            setError("Client not logged in. Please log in first.");
             return;
         }
 
-        const data = {
-            bill_id: selectedBillId,
-            payment_status: paymentStatus,
-            note: paymentStatus === "disputed" ? note : null, // Attach a note only for disputes
-        };
-
-        // Submit payment or dispute status to the backend
-        fetch(`http://localhost:5050/api/bills/${selectedBillId}`, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(data),
-        })
-            .then((response) => response.json())
-            .then((data) => {
-                console.log("Response:", data);
-                alert("Payment status updated successfully.");
+        fetch(`http://localhost:5050/bills/client/${clientId}`)
+            .then((response) => {
+                if (!response.ok) throw new Error("Failed to fetch bills.");
+                return response.json();
             })
-            .catch((error) => console.error("Error updating payment status:", error));
+            .then((data) => setBills(data))
+            .catch((err) => setError(err.message));
+    }, [clientId]);
+
+    // Handle payment or dispute action
+    const handleAction = async () => {
+        setError("");
+        setSuccess("");
+
+        if (!selectedBillId || !status) {
+            setError("Please select a bill and an action.");
+            return;
+        }
+
+        try {
+            const endpoint =
+                status === "paid"
+                    ? `http://localhost:5050/bills/pay/${selectedBillId}`
+                    : `http://localhost:5050/bills/dispute/${selectedBillId}`;
+            const body = status === "disputed" ? JSON.stringify({ note }) : null;
+
+            const response = await fetch(endpoint, {
+                method: "PATCH",
+                headers: { "Content-Type": "application/json" },
+                body: body,
+            });
+
+            if (!response.ok) throw new Error("Failed to update bill status.");
+
+            setSuccess(`Bill ${status === "paid" ? "paid" : "disputed"} successfully!`);
+            setStatus("");
+            setSelectedBillId("");
+            setNote("");
+
+            // Refresh bills after an action
+            fetch(`http://localhost:5050/bills/client/${clientId}`)
+                .then((response) => response.json())
+                .then((data) => setBills(data));
+        } catch (err) {
+            setError(err.message);
+        }
     };
 
     return (
         <div>
             <h2>Your Bills</h2>
+            {error && <p style={{ color: "red" }}>{error}</p>}
+            {success && <p style={{ color: "green" }}>{success}</p>}
+
             <div>
                 <h3>All Bills</h3>
-                <ul>
-                    {bills.map((bill) => (
-                        <li key={bill.bill_id}>
-                            <strong>Bill ID:</strong> {bill.bill_id} | <strong>Amount:</strong> ${bill.amount} | <strong>Status:</strong> {bill.status}
-                        </li>
-                    ))}
-                </ul>
+                {bills.length > 0 ? (
+                    <table border="1" width="100%">
+                        <thead>
+                            <tr>
+                                <th>Bill ID</th>
+                                <th>Amount</th>
+                                <th>Status</th>
+                                <th>Created At</th>
+                                <th>Paid At</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {bills.map((bill) => (
+                                <tr key={bill.bill_id}>
+                                    <td>{bill.bill_id}</td>
+                                    <td>${bill.total_amount}</td>
+                                    <td>{bill.status}</td>
+                                    <td>{bill.created_at}</td>
+                                    <td>{bill.paid_at || "Not Paid"}</td>
+                                </tr>
+                            ))}
+                        </tbody>
+                    </table>
+                ) : (
+                    <p>No bills found.</p>
+                )}
             </div>
+
             <div>
-                <h3>Update Payment Status</h3>
-                <select
-                    value={selectedBillId}
-                    onChange={(e) => setSelectedBillId(e.target.value)}
-                >
+                <h3>Update Bill Status</h3>
+                <select value={selectedBillId} onChange={(e) => setSelectedBillId(e.target.value)}>
                     <option value="">Select a Bill</option>
                     {bills.map((bill) => (
                         <option key={bill.bill_id} value={bill.bill_id}>
-                            Bill ID: {bill.bill_id} - Amount: ${bill.amount}
+                            Bill ID: {bill.bill_id} - Amount: ${bill.total_amount} - Status: {bill.status}
                         </option>
                     ))}
                 </select>
 
-                <select
-                    value={paymentStatus}
-                    onChange={(e) => setPaymentStatus(e.target.value)}
-                >
-                    <option value="">Select Payment Status</option>
-                    <option value="paid">Pay Now</option>
+                <select value={status} onChange={(e) => setStatus(e.target.value)}>
+                    <option value="">Select Action</option>
+                    <option value="paid">Pay</option>
                     <option value="disputed">Dispute</option>
                 </select>
 
-                {paymentStatus === "disputed" && (
+                {status === "disputed" && (
                     <textarea
                         placeholder="Add a note for the dispute"
                         value={note}
@@ -84,10 +126,10 @@ const Bill = () => {
                     />
                 )}
 
-                <button onClick={handlePayment}>Submit Payment Status</button>
+                <button onClick={handleAction}>Submit</button>
             </div>
         </div>
     );
 };
 
-export default Bill;
+export default Bills;

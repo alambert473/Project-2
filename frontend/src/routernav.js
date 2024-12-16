@@ -5,7 +5,7 @@ import ClientDashboard from './clientDashboard';
 import ContractorDashboard from './contractorDashboard';
 import RequestForQuote from './requestForQuote';
 import QuoteResponse from './quoteResponse';
-import Order from './order';
+import Viewqoute from './Viewqoute';
 import Bill from './bill';
 
 const RouterNav = () => {
@@ -18,7 +18,7 @@ const RouterNav = () => {
         <Route path="/contractor-dashboard" element={<ContractorDashboard />} />
         <Route path="/request-quote" element={<RequestForQuote />} />
         <Route path="/quote-response" element={<QuoteResponse />} />
-        <Route path="/order" element={<Order />} />
+        <Route path="/viewqoute" element={<Viewqoute />} />
         <Route path="/bill" element={<Bill />} />
       </Routes>
     </BrowserRouter>

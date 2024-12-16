@@ -7,7 +7,8 @@ const ClientDashboard = () => {
             <h2>Client Dashboard</h2>
             <ul>
                 <li><Link to="/request-quote">Request a Quote</Link></li>
-                <li><Link to="/quote-response">View Your Quotes</Link></li>
+                <li><Link to="/quote-response">Accept a qoute</Link></li>
+                <li><Link to="/Viewqoute">View your qoutes</Link></li>
                 <li><Link to="/order">View Your Orders</Link></li>
                 <li><Link to="/bill">View Your Bills</Link></li>
             </ul>

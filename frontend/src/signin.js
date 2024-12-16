@@ -25,12 +25,15 @@ const SignIn = () => {
                 throw new Error('Invalid email or password.');
             }
 
+            
             const result = await response.json();
+            
+            localStorage.setItem('client_id', JSON.stringify(result.client_id));
+            localStorage.setItem('email', JSON.stringify(email));
             setSuccess('Login successful!');
-            localStorage.setItem('client_id', result.client_id); 
-            localStorage.setItem('email', email); 
-
             navigate('/client-dashboard'); // Redirect to the client dashboard
+
+            
         } catch (err) {
             setError(err.message);
         }
@@ -41,8 +44,6 @@ const SignIn = () => {
             <div className="container">
                 <i className="fa-solid fa-user user-picture"></i>
                 <p>Sign in</p>
-                {error && <p className="error">{error}</p>}
-                {success && <p className="success">{success}</p>}
                 <form onSubmit={handleSubmit}>
                     <input
                         className="email-section"

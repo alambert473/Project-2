@@ -4,6 +4,9 @@ const dotenv = require('dotenv');
 dotenv.config();
 
 const clientsRoutes = require('./routes/clients');
+const requestsRoutes = require('./routes/requests'); // Import the requests routes
+const quotesRoutes = require('./routes/qoutes'); // Import the quotes routes
+
 const app = express();
 
 app.use(cors());
@@ -12,6 +15,8 @@ app.use(express.urlencoded({ extended: false }));
 
 // Routes
 app.use('/clients', clientsRoutes);
+app.use('/requests', requestsRoutes); // Use the /requests route
+app.use('/quotes', quotesRoutes); // Use the /quotes route
 
 // Test route
 app.get('/', (req, res) => {
