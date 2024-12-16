@@ -8,11 +8,9 @@ const QuoteResponse = () => {
     const [workStartDate, setWorkStartDate] = useState(''); // Work start date input
     const [workEndDate, setWorkEndDate] = useState(''); // Work end date input
 
-    // Check if the user is David Smith
     const userEmail = JSON.parse(localStorage.getItem("email"));
-    const isDavidSmith = userEmail === "david@smith.com"; // Replace with David's actual email
+    const isDavidSmith = userEmail === "david@smith.com"; 
 
-    // Fetch all pending requests
     useEffect(() => {
         if (isDavidSmith) {
             fetch("http://localhost:5050/requests/pending-requests")
